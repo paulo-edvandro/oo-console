@@ -209,7 +209,7 @@ public class Main {
      * @return nova `Missao` configurada
      */
     private static Missao criarNovaMissao(Random random, int minX, int maxX, int minY, int maxY) {
-        Nave nave = new Nave("A-1", 3);
+        Nave nave = new Nave("A-1", 5);
         Missao missao = new Missao(nave);
 
         // Cria 3 passageiros em posições aleatórias dentro dos limites
