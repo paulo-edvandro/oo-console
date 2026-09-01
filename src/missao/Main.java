@@ -42,11 +42,33 @@ public class Main {
 
         // Scanner para leitura de entradas do usuário via console
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Digite o nome do piloto: ");
+        System.out.print("Qual o nome do Piloto?\n");
         String pilotoNome = scanner.nextLine().trim();
         if (pilotoNome.isEmpty()) {
             pilotoNome = "Piloto Anônimo";
+        }// --- INÍCIO DO NOVO CÓDIGO DO MENU ---
+        System.out.println("\nSelecione o nível de dificuldade:");
+        System.out.println("1 - FÁCIL (30 pts, 1 asteroide)");
+        System.out.println("2 - MÉDIO (20 pts, 2 asteroides)");
+        System.out.println("3 - DIFÍCIL (10 pts, 4 asteroides)");
+        System.out.print("Opção: ");
+        
+        String opcaoDif = scanner.nextLine().trim();
+        Dificuldade dificuldadeEscolhida;
+        
+        switch (opcaoDif) {
+            case "1":
+                dificuldadeEscolhida = Dificuldade.FACIL;
+                break;
+            case "3":
+                dificuldadeEscolhida = Dificuldade.DIFICIL;
+                break;
+            default:
+                dificuldadeEscolhida = Dificuldade.MEDIO;
+                break;
         }
+        System.out.println("Dificuldade definida para: " + dificuldadeEscolhida);
+        // --- FIM DO NOVO CÓDIGO DO MENU ---
 
         // Cabeçalho e instruções iniciais do jogo
         System.out.println("================================================================");
@@ -90,9 +112,9 @@ public class Main {
         // Loop externo: permite jogar várias missões até o usuário optar por sair
         boolean playAgain = true;
         while (playAgain) {
-            Missao missao = criarNovaMissao(random, minX, maxX, minY, maxY);
+            Missao missao = criarNovaMissao(random, minX, maxX, minY, maxY, dificuldadeEscolhida);
             Nave nave = missao.getNave();
-            int score = 20;
+            int score = dificuldadeEscolhida.getPontuacaoInicial();
             boolean running = true;
 
             while (running) {
@@ -151,7 +173,12 @@ public class Main {
                     System.out.printf("Pontuação final: %d\n", score);
                     if (score > 0 && isTopScore(ranking, score)) {
                         // Atualiza ranking e persiste no disco
-                        ranking.add(new RankingEntry(pilotoNome, score));
+                        // Captura os dados extras da partida
+                        String dataAtual = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                        int passageirosSalvos = nave.getPassageiros().size();
+                        String nivelStr = dificuldadeEscolhida.name();
+                        
+                        ranking.add(new RankingEntry(pilotoNome, score, dataAtual, passageirosSalvos, nivelStr));
                         ranking = ranking.stream()
                                 .sorted(Comparator.comparingInt((RankingEntry e) -> e.score).reversed())
                                 .limit(5)
@@ -190,10 +217,12 @@ public class Main {
      *
      * @param ranking lista ordenada de `RankingEntry` a ser exibida
      */
+    // Informa todas as infos que foram capturadas, pra ficar mais 'munitinho'
     private static void printRanking(List<RankingEntry> ranking) {
         int position = 1;
         for (RankingEntry entry : ranking) {
-            System.out.printf("%d. %s - %d pontos%n", position++, entry.name, entry.score);
+            System.out.printf("%d. %s - %d pontos | Nível: %s | Salvos: %d/3 | Data: %s%n", 
+                    position++, entry.name, entry.score, entry.nivelDificuldade, entry.passageirosResgatados, entry.dataHora);
         }
     }
 
@@ -208,7 +237,7 @@ public class Main {
      * @param maxY limite máximo Y do mapa
      * @return nova `Missao` configurada
      */
-    private static Missao criarNovaMissao(Random random, int minX, int maxX, int minY, int maxY) {
+    private static Missao criarNovaMissao(Random random, int minX, int maxX, int minY, int maxY, Dificuldade dificuldade) {
         Nave nave = new Nave("A-1", 3);
         Missao missao = new Missao(nave);
 
@@ -231,8 +260,8 @@ public class Main {
             }
         }
 
-        // Cria 2 asteroides em posições aleatórias sem colidir com a nave nem com passageiros
-        while (missao.getAsteroides().size() < 2) {
+        // agora cria asteroides baseados na dificuldade
+        while (missao.getAsteroides().size() < dificuldade.getQtdAsteroides()) { 
             int x = random.nextInt(maxX - minX + 1) + minX;
             int y = random.nextInt(maxY - minY + 1) + minY;
             if (x == nave.getX() && y == nave.getY()) continue;
@@ -382,13 +411,14 @@ public class Main {
     private static void saveRanking(Path path, List<RankingEntry> ranking) {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
-        for (int i = 0; i < ranking.size(); i++) {
+        for (int i = 0; i < ranking.size(); i++) { // agora escrever melhor no JSON, append pra ir no final da Lista
             RankingEntry entry = ranking.get(i);
-            builder.append("{\"name\":\"")
-                    .append(entry.name.replace("\"", "\\\""))
-                    .append("\",\"score\":")
-                    .append(entry.score)
-                    .append("}");
+            builder.append("{\"name\":\"").append(entry.name.replace("\"", "\\\""))
+                   .append("\",\"score\":").append(entry.score)
+                   .append(",\"dataHora\":\"").append(entry.dataHora)
+                   .append("\",\"passageirosResgatados\":").append(entry.passageirosResgatados)
+                   .append(",\"nivelDificuldade\":\"").append(entry.nivelDificuldade)
+                   .append("\"}");
             if (i < ranking.size() - 1) {
                 builder.append(",");
             }
@@ -434,27 +464,34 @@ public class Main {
             String object = json.substring(start + 1, end);
             String name = null;
             Integer score = null;
+            // Valores padrão caso leia um arquivo antigo sem esses campos
+            String dataHora = "Data Indisponível";
+            int passageirosResgatados = 3;
+            String nivelDificuldade = "DESCONHECIDO";
+
             // divide por vírgulas e tenta extrair pares chave:valor
             for (String part : object.split(",")) {
                 String[] pair = part.split(":", 2);
                 if (pair.length != 2) continue;
+                
                 String key = pair[0].trim().replaceAll("\"", "");
-                String value = pair[1].trim();
+                String value = pair[1].trim().replaceAll("\"", ""); // Limpa as aspas do valor também
+
                 if (key.equals("name")) {
-                    // remove aspas ao redor do valor de name e desfaz escape de aspas
-                    if (value.startsWith("\"") && value.endsWith("\"")) {
-                        name = value.substring(1, value.length() - 1).replace("\\\"", "\"");
-                    }
+                    name = value;
                 } else if (key.equals("score")) {
-                    try {
-                        score = Integer.parseInt(value);
-                    } catch (NumberFormatException ignored) {
-                        // valor inválido; ignora e não adiciona essa entrada
-                    }
+                    try { score = Integer.parseInt(value); } catch (NumberFormatException ignored) {}
+                } else if (key.equals("dataHora")) {
+                    dataHora = value;
+                } else if (key.equals("passageirosResgatados")) {
+                    try { passageirosResgatados = Integer.parseInt(value); } catch (NumberFormatException ignored) {}
+                } else if (key.equals("nivelDificuldade")) {
+                    nivelDificuldade = value;
                 }
             }
             if (name != null && score != null) {
-                ranking.add(new RankingEntry(name, score));
+                // Agora passamos as variáveis reais que o parser encontrou (ou os valores padrão)
+                ranking.add(new RankingEntry(name, score, dataHora, passageirosResgatados, nivelDificuldade));
             }
             // avança para procurar o próximo objeto
             index = end + 1;
@@ -471,10 +508,16 @@ public class Main {
     private static class RankingEntry {
         private final String name;
         private final int score;
+        private final String dataHora; // Final para garantir que as var não serão sobescritas
+        private final int passageirosResgatados;
+        private final String nivelDificuldade;
 
-        private RankingEntry(String name, int score) {
+        private RankingEntry(String name, int score, String dataHora, int passageirosResgatados, String nivelDificuldade) {
             this.name = name;
             this.score = score;
+            this.dataHora = dataHora;
+            this.passageirosResgatados = passageirosResgatados;
+            this.nivelDificuldade = nivelDificuldade;
         }
     }
 }
