@@ -61,10 +61,12 @@ public class Main {
                 System.out.printf(" %d. %s: %d pontos%n", i + 1, entry.name, entry.score);
             }
         }
-                
+
         System.out.println();
-        System.out.println("Bem-vindo à Missão Marte Unifor! Sua nave foi selecionada para uma expedição de resgate e pesquisa na superfície marciana.");
-        System.out.println("Seu objetivo é localizar e embarcar todos os passageiros necessários para completar a missão antes que o seu tempo (pontuação) chegue a zero.");
+        System.out.println(
+                "Bem-vindo à Missão Marte Unifor! Sua nave foi selecionada para uma expedição de resgate e pesquisa na superfície marciana.");
+        System.out.println(
+                "Seu objetivo é localizar e embarcar todos os passageiros necessários para completar a missão antes que o seu tempo (pontuação) chegue a zero.");
         System.out.println();
         System.out.println("Objetivo:");
         System.out.println(" - Mover a nave pelo mapa");
@@ -80,7 +82,8 @@ public class Main {
         System.out.println(" - c: embarcar passageiro na posição atual");
         System.out.println(" - q: sair do jogo");
         System.out.println();
-        System.out.println("Pontuação inicial: 20 pontos. Cada movimento custa 1 ponto. Cada embarque vale +10 pontos.");
+        System.out
+                .println("Pontuação inicial: 20 pontos. Cada movimento custa 1 ponto. Cada embarque vale +10 pontos.");
         System.out.println();
         System.out.println("Pressione Enter para iniciar a missão...");
         // Aguarda o usuário pressionar Enter antes de iniciar o primeiro jogo
@@ -98,8 +101,10 @@ public class Main {
             while (running) {
                 // Desenha o estado atual do mapa no console
                 desenharMapa(missao, -5, 5, -5, 5, score, pilotoNome);
-                System.out.printf("Nave em (%d,%d) | Pontos: %d | Passageiros a bordo: %d | Passageiros restantes: %d\n",
-                        nave.getX(), nave.getY(), score, nave.getPassageiros().size(), missao.todosEmbarcados() ? 0 : missao.getPassageiros().size());
+                System.out.printf(
+                        "Nave em (%d,%d) | Pontos: %d | Passageiros a bordo: %d | Passageiros restantes: %d\n",
+                        nave.getX(), nave.getY(), score, nave.getPassageiros().size(),
+                        missao.todosEmbarcados() ? 0 : missao.getPassageiros().size());
 
                 if (missao.verificaColisao()) {
                     // Se a nave estiver na mesma posição de um asteroide, fim da missão
@@ -110,13 +115,26 @@ public class Main {
                 System.out.print("Para onde ir? ");
                 // Leitura do comando do jogador (w/s/a/d/c/q)
                 String line = scanner.nextLine().trim().toLowerCase();
-                if (line.isEmpty()) continue;
+                if (line.isEmpty())
+                    continue;
                 char cmd = line.charAt(0);
                 switch (cmd) {
-                    case 'w': nave.moveUp(); score--; break;
-                    case 's': nave.moveDown(); score--; break;
-                    case 'a': nave.moveLeft(); score--; break;
-                    case 'd': nave.moveRight(); score--; break;
+                    case 'w':
+                        nave.moveUp();
+                        score--;
+                        break;
+                    case 's':
+                        nave.moveDown();
+                        score--;
+                        break;
+                    case 'a':
+                        nave.moveLeft();
+                        score--;
+                        break;
+                    case 'd':
+                        nave.moveRight();
+                        score--;
+                        break;
                     case 'c': {
                         // Tenta embarcar um passageiro se houver um na posição atual
                         Passageiro p = missao.passagemNaPosicao();
@@ -135,8 +153,11 @@ public class Main {
                         }
                         break;
                     }
-                    case 'q': running = false; break;
-                    default: System.out.println("Comando desconhecido.");
+                    case 'q':
+                        running = false;
+                        break;
+                    default:
+                        System.out.println("Comando desconhecido.");
                 }
 
                 if (score <= 0) {
@@ -202,10 +223,10 @@ public class Main {
      * asteroides em posições aleatórias dentro dos limites especificados.
      *
      * @param random gerador aleatório reutilizável
-     * @param minX limite mínimo X do mapa
-     * @param maxX limite máximo X do mapa
-     * @param minY limite mínimo Y do mapa
-     * @param maxY limite máximo Y do mapa
+     * @param minX   limite mínimo X do mapa
+     * @param maxX   limite máximo X do mapa
+     * @param minY   limite mínimo Y do mapa
+     * @param maxY   limite máximo Y do mapa
      * @return nova `Missao` configurada
      */
     private static Missao criarNovaMissao(Random random, int minX, int maxX, int minY, int maxY) {
@@ -218,25 +239,30 @@ public class Main {
             int x = random.nextInt(maxX - minX + 1) + minX;
             int y = random.nextInt(maxY - minY + 1) + minY;
             // evita posicionar um passageiro exatamente na posição inicial da nave
-            if (x == nave.getX() && y == nave.getY()) continue;
+            if (x == nave.getX() && y == nave.getY())
+                continue;
             // evita sobreposição com outras entidades já posicionadas
-            if (posicaoOcupada(missao, x, y)) continue;
+            if (posicaoOcupada(missao, x, y))
+                continue;
             // adiciona tipos diferentes em ordem: Professor, Engenheiro, Professor
             if (missao.getPassageiros().isEmpty()) {
                 missao.addPassageiro(new Professor("Dr. Silva", x, y));
             } else if (missao.getPassageiros().size() == 1) {
                 missao.addPassageiro(new Engenheiro("Eng. Rosa", x, y));
             } else {
-                missao.addPassageiro(new Professor("Dr. Lima", x, y));
+                missao.addPassageiro(new Astronauta("Ast. Lima", x, y));
             }
         }
 
-        // Cria 2 asteroides em posições aleatórias sem colidir com a nave nem com passageiros
+        // Cria 2 asteroides em posições aleatórias sem colidir com a nave nem com
+        // passageiros
         while (missao.getAsteroides().size() < 2) {
             int x = random.nextInt(maxX - minX + 1) + minX;
             int y = random.nextInt(maxY - minY + 1) + minY;
-            if (x == nave.getX() && y == nave.getY()) continue;
-            if (posicaoOcupada(missao, x, y)) continue;
+            if (x == nave.getX() && y == nave.getY())
+                continue;
+            if (posicaoOcupada(missao, x, y))
+                continue;
             missao.addAsteroide(new Asteroide(x, y));
         }
 
@@ -248,20 +274,23 @@ public class Main {
      * missão (nave, passageiros ou asteroides).
      *
      * @param missao missão que contém entidades
-     * @param x coordenada X
-     * @param y coordenada Y
+     * @param x      coordenada X
+     * @param y      coordenada Y
      * @return true se ocupada, false caso contrário
      */
     private static boolean posicaoOcupada(Missao missao, int x, int y) {
         // verifica se a própria nave está na posição
-        if (missao.getNave().getX() == x && missao.getNave().getY() == y) return true;
+        if (missao.getNave().getX() == x && missao.getNave().getY() == y)
+            return true;
         // verifica cada passageiro
         for (Passageiro p : missao.getPassageiros()) {
-            if (p.getX() == x && p.getY() == y) return true;
+            if (p.getX() == x && p.getY() == y)
+                return true;
         }
         // verifica cada asteroide
         for (Asteroide a : missao.getAsteroides()) {
-            if (a.getX() == x && a.getY() == y) return true;
+            if (a.getX() == x && a.getY() == y)
+                return true;
         }
         // posição livre
         return false;
@@ -271,15 +300,16 @@ public class Main {
      * Renderiza no console um mapa textual com a posição da nave, passageiros
      * e asteroides, além de legenda e resumo de comandos.
      *
-     * @param missao estado atual da missão
-     * @param minX limite mínimo X para renderização
-     * @param maxX limite máximo X para renderização
-     * @param minY limite mínimo Y para renderização
-     * @param maxY limite máximo Y para renderização
-     * @param score pontuação atual do jogador
+     * @param missao     estado atual da missão
+     * @param minX       limite mínimo X para renderização
+     * @param maxX       limite máximo X para renderização
+     * @param minY       limite mínimo Y para renderização
+     * @param maxY       limite máximo Y para renderização
+     * @param score      pontuação atual do jogador
      * @param pilotoNome nome do piloto para exibição
      */
-    private static void desenharMapa(Missao missao, int minX, int maxX, int minY, int maxY, int score, String pilotoNome) {
+    private static void desenharMapa(Missao missao, int minX, int maxX, int minY, int maxY, int score,
+            String pilotoNome) {
         System.out.println();
         System.out.printf("Mapa da Missão (Pontos: %d) - Piloto: %s%n", score, pilotoNome);
         System.out.print("    ");
@@ -300,7 +330,7 @@ public class Main {
             for (int x = minX; x <= maxX; x++) {
                 char symbol = '.';
                 if (missao.getNave().getX() == x && missao.getNave().getY() == y) {
-                    symbol = 'N';
+                    symbol = '@';
                 } else {
                     // verifica passageiros primeiro (preferência de desenho)
                     for (Passageiro p : missao.getPassageiros()) {
@@ -308,6 +338,8 @@ public class Main {
                             // diferencia engenheiro de professor pelo símbolo
                             if (p instanceof Engenheiro) {
                                 symbol = 'E';
+                            } else if (p instanceof Astronauta) {
+                                symbol = 'T';
                             } else {
                                 symbol = 'P';
                             }
@@ -318,7 +350,7 @@ public class Main {
                     if (symbol == '.') {
                         for (Asteroide a : missao.getAsteroides()) {
                             if (a.getX() == x && a.getY() == y) {
-                                symbol = 'A';
+                                symbol = '#';
                                 break;
                             }
                         }
@@ -342,7 +374,7 @@ public class Main {
      * Retorna se a pontuação informada entra no ranking top-5.
      *
      * @param ranking lista atual de pontuações (ordenada desc)
-     * @param score pontuação a avaliar
+     * @param score   pontuação a avaliar
      * @return true se for top-5, false caso contrário
      */
     private static boolean isTopScore(List<RankingEntry> ranking, int score) {
@@ -376,7 +408,7 @@ public class Main {
     /**
      * Salva a lista de ranking no arquivo informado em formato JSON simples.
      *
-     * @param path caminho destino do arquivo
+     * @param path    caminho destino do arquivo
      * @param ranking lista de `RankingEntry` a gravar
      */
     private static void saveRanking(Path path, List<RankingEntry> ranking) {
@@ -428,16 +460,19 @@ public class Main {
         int index = 0;
         while (index < json.length()) {
             int start = json.indexOf('{', index);
-            if (start < 0) break; // sem mais objetos
+            if (start < 0)
+                break; // sem mais objetos
             int end = json.indexOf('}', start);
-            if (end < 0) break; // objeto incompleto
+            if (end < 0)
+                break; // objeto incompleto
             String object = json.substring(start + 1, end);
             String name = null;
             Integer score = null;
             // divide por vírgulas e tenta extrair pares chave:valor
             for (String part : object.split(",")) {
                 String[] pair = part.split(":", 2);
-                if (pair.length != 2) continue;
+                if (pair.length != 2)
+                    continue;
                 String key = pair[0].trim().replaceAll("\"", "");
                 String value = pair[1].trim();
                 if (key.equals("name")) {
