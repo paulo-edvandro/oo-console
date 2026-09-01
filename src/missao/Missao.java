@@ -3,6 +3,7 @@ package missao;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Representa o estado da missão: nave, passageiros e asteroides.
@@ -13,6 +14,22 @@ public class Missao {
     private Nave nave;
     private List<Passageiro> passageiros = new ArrayList<>();
     private List<Asteroide> asteroides = new ArrayList<>();
+
+    private List<Inimigo> inimigos = new ArrayList<>();
+
+    public List<Inimigo> getInimigos() {
+        return inimigos;
+    }
+
+    public void addInimigo(Inimigo inimigo) {
+        inimigos.add(inimigo);
+    }
+
+    public void moverInimigos(Random random) {
+        for (Inimigo inimigo : inimigos) {
+            inimigo.mover(random);
+        }
+    }
 
     public Missao(Nave nave) {
         this.nave = nave;
@@ -45,13 +62,43 @@ public class Missao {
     public void addAsteroide(Asteroide a) { asteroides.add(a); }
 
     public boolean verificaColisao() {
-        // Percorre todos os asteroides e verifica se algum coincide com a
-        // posição da nave. Uso de método em Asteroide encapsula a checagem.
+
+        // Verifica colisão com asteroides
         for (Asteroide a : asteroides) {
-            if (a.colideCom(nave)) return true;
+            if (a.colideCom(nave)) {
+                return true;
+            }
+        }
+
+        // Verifica colisão com inimigos
+        for (Inimigo i : inimigos) {
+            if (i.colideCom(nave)) {
+                return true;
+            }
+        }
+
+
+
+        return false;
+    }
+    public boolean colidiuComAsteroide() {
+        for (Asteroide a : asteroides) {
+            if (a.colideCom(nave)) {
+                return true;
+            }
         }
         return false;
     }
+
+    public boolean colidiuComInimigo() {
+        for (Inimigo i : inimigos) {
+            if (i.colideCom(nave)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Retorna o primeiro passageiro encontrado na mesma posição da nave,
