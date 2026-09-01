@@ -145,8 +145,9 @@ public class Main {
                             // apenas se o embarque na nave for bem-sucedido
                             boolean ok = missao.embarcarPassageiroNaPosicao();
                             if (ok) {
-                                score += 10; // bônus por embarque
-                                System.out.println("Passageiro embarcado. +10 pontos!");
+                                int bonus = p.getPontuacao();
+                                score += bonus; // bônus por embarque
+                                System.out.println("Passageiro embarcado +" + bonus + " pontoss");
                             } else {
                                 System.out.println("Nave cheia, não foi possível embarcar.");
                             }
