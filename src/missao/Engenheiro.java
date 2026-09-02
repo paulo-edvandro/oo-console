@@ -11,6 +11,6 @@ public class Engenheiro extends Passageiro {
 
     @Override
     public int getPontuacao() {
-        return 10;
+        return 15;
     }
 }

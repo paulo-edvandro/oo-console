@@ -121,8 +121,9 @@ public class Main {
                         } else {
                             boolean ok = missao.embarcarPassageiroNaPosicao();
                             if (ok) {
-                                score += 10;
-                                System.out.println("Passageiro embarcado. +10 pontos!");
+                                int bonus = p.getPontuacao();
+                                score += bonus;
+                                System.out.println("Passageiro embarcado. +" + bonus + " pontos!");
                             } else {
                                 System.out.println("Nave cheia, não foi possível embarcar.");
                             }
@@ -202,7 +203,7 @@ public class Main {
             } else if (missao.getPassageiros().size() == 1) {
                 missao.addPassageiro(new Engenheiro("Eng. Rosa", x, y));
             } else {
-                missao.addPassageiro(new Professor("Dr. Lima", x, y));
+                missao.addPassageiro(new Astronauta("Ast. Lima", x, y));
             }
         }
 
@@ -247,12 +248,14 @@ public class Main {
             for (int x = minX; x <= maxX; x++) {
                 char symbol = '.';
                 if (missao.getNave().getX() == x && missao.getNave().getY() == y) {
-                    symbol = 'N';
+                    symbol = '@';
                 } else {
                     for (Passageiro p : missao.getPassageiros()) {
                         if (p.getX() == x && p.getY() == y) {
                             if (p instanceof Engenheiro) {
                                 symbol = 'E';
+                            } else if (p instanceof Astronauta) {
+                                symbol = 'T';
                             } else {
                                 symbol = 'P';
                             }
@@ -262,7 +265,7 @@ public class Main {
                     if (symbol == '.') {
                         for (Asteroide a : missao.getAsteroides()) {
                             if (a.getX() == x && a.getY() == y) {
-                                symbol = 'A';
+                                symbol = '#';
                                 break;
                             }
                         }
@@ -273,7 +276,7 @@ public class Main {
             System.out.println();
         }
 
-        System.out.println("Legenda: N=Nave, P=Professor, E=Engenheiro, A=Asteroide, .=Vazio");
+        System.out.println("Legenda: @=Nave, P=Professor, E=Engenheiro, T=Astronauta, #=Asteroide, .=Vazio");
         System.out.println("Passageiros restantes:");
         for (Passageiro p : missao.getPassageiros()) {
             System.out.printf(" - %s (%s) em (%d,%d)\n", p.getNome(), p.getTipo(), p.getX(), p.getY());
