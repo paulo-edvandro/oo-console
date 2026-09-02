@@ -4,7 +4,7 @@ package missao;
  * Entidade básica que representa um passageiro no mapa com nome, tipo e
  * coordenadas (x,y).
  */
-public abstract class Passageiro {
+public class Passageiro {
     private String nome;
     private String tipo;
     private int x;
@@ -24,6 +24,4 @@ public abstract class Passageiro {
     public int getX() { return x; }
 
     public int getY() { return y; }
-
-    public abstract int getPontuacao();
 }

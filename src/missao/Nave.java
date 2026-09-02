@@ -12,7 +12,6 @@ public class Nave {
     private int x;
     private int y;
     private int capacidade;
-    private int vidas;
     private List<Passageiro> passageiros = new ArrayList<>();
 
     /**
@@ -21,10 +20,9 @@ public class Nave {
      * @param id identificador da nave
      * @param capacidade número máximo de passageiros que podem ser embarcados
      */
-    public Nave(String id, int capacidade, int vidas) {
+    public Nave(String id, int capacidade) {
         this.id = id;
         this.capacidade = capacidade;
-        this.vidas = vidas;
         this.x = 0;
         this.y = 0;
     }
@@ -36,10 +34,6 @@ public class Nave {
     public int getY() { return y; }
 
     public int getCapacidade() { return capacidade; }
-
-    public void perderVida() { vidas--; }
-
-    public int getVidas() {return vidas;}
 
     public List<Passageiro> getPassageiros() { return passageiros; }
 
