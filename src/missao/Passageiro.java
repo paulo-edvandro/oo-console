@@ -24,4 +24,6 @@ public class Passageiro {
     public int getX() { return x; }
 
     public int getY() { return y; }
+
+    public int getPontuacao() { return 10; }
 }
