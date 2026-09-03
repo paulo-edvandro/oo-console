@@ -87,6 +87,14 @@ public class Main {
         System.out.println("Pressione Enter para iniciar a missão...");
         scanner.nextLine();
         System.out.println("================================================================");
+        
+        System.out.print("Tamanho do mapa (-X a +X): ");
+        int tamanho = Integer.parseInt(scanner.nextLine());
+
+        minX = -tamanho;
+        maxX = tamanho;
+        minY = -tamanho;
+        maxY = tamanho;
 
         boolean playAgain = true;
         while (playAgain) {
@@ -95,14 +103,22 @@ public class Main {
             int score = dificuldadeEscolhida.getPontuacaoInicial();
             boolean running = true;
 
+            
+
             while (running) {
-                desenharMapa(missao, -5, 5, -5, 5, score, pilotoNome);
+                desenharMapa(missao, -tamanho, tamanho, -tamanho, tamanho, score, pilotoNome);
                 System.out.printf("Nave em (%d,%d) | Pontos: %d | Passageiros a bordo: %d | Passageiros restantes: %d\n",
                         nave.getX(), nave.getY(), score, nave.getPassageiros().size(), missao.todosEmbarcados() ? 0 : missao.getPassageiros().size());
 
                 if (missao.verificaColisao()) {
-                    System.out.println("Colisão com asteroide! Missão abortada.");
-                    break;
+                    nave.perderVida();
+                    if (nave.getVidas() == 0) {
+                        System.out.println("Game Over!");
+                        break;
+                    } else {
+                        System.out.println("Bateu em asteroide! Vidas restantes: " + nave.getVidas());
+                        // Reposicionar nave
+                    }
                 }
 
                 System.out.print("Para onde ir? ");
@@ -131,6 +147,19 @@ public class Main {
                     }
                     case 'q': running = false; break;
                     default: System.out.println("Comando desconhecido.");
+                }
+
+                missao.moverInimigos(random);
+
+                if (missao.verificaColisaoInimigo()) {
+                    nave.perderVida();
+
+                    System.out.println("Bateu em um inimigo! Vidas restantes: " + nave.getVidas());
+
+                    if (nave.getVidas() == 0) {
+                        System.out.println("Game Over!");
+                        running = false;
+                    }
                 }
 
                 if (score <= 0) {
@@ -188,8 +217,10 @@ public class Main {
         }
     }
 
+    
+
     private static Missao criarNovaMissao(Random random, int minX, int maxX, int minY, int maxY, Dificuldade dificuldade) {
-        Nave nave = new Nave("A-1", 5); // Mantendo capacidade 5 da branch do Paulo
+        Nave nave = new Nave("A-1", 5, 3); // Mantendo capacidade 5 da branch do Paulo
         Missao missao = new Missao(nave);
 
         while (missao.getPassageiros().size() < 3) {
@@ -212,6 +243,16 @@ public class Main {
             if (x == nave.getX() && y == nave.getY()) continue;
             if (posicaoOcupada(missao, x, y)) continue;
             missao.addAsteroide(new Asteroide(x, y));
+        }
+
+        while (missao.getInimigos().size() < 2) {
+            int x = random.nextInt(maxX - minX + 1) + minX;
+            int y = random.nextInt(maxY - minY + 1) + minY;
+
+            if (x == nave.getX() && y == nave.getY()) continue;
+            if (posicaoOcupada(missao, x, y)) continue;
+
+            missao.addInimigo(new Inimigo(x, y));
         }
 
         return missao;
@@ -267,13 +308,21 @@ public class Main {
                             }
                         }
                     }
+                    if (symbol == '.') {
+                        for (Inimigo inimigo : missao.getInimigos()) {
+                            if (inimigo.getX() == x && inimigo.getY() == y) {
+                                symbol = 'I';
+                                break;
+                            }
+                        }
+                    }
                 }
                 System.out.printf(" %2c", symbol);
             }
             System.out.println();
         }
 
-        System.out.println("Legenda: N=Nave, P=Professor, E=Engenheiro, A=Asteroide, .=Vazio");
+        System.out.println("Legenda: N=Nave, P=Professor, E=Engenheiro, A=Asteroide, I=Inimigo, .=Vazio");
         System.out.println("Passageiros restantes:");
         for (Passageiro p : missao.getPassageiros()) {
             System.out.printf(" - %s (%s) em (%d,%d)\n", p.getNome(), p.getTipo(), p.getX(), p.getY());

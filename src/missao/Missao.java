@@ -3,6 +3,7 @@ package missao;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Representa o estado da missão: nave, passageiros e asteroides.
@@ -13,6 +14,8 @@ public class Missao {
     private Nave nave;
     private List<Passageiro> passageiros = new ArrayList<>();
     private List<Asteroide> asteroides = new ArrayList<>();
+    private List<Inimigo> inimigos = new ArrayList<>();
+
 
     public Missao(Nave nave) {
         this.nave = nave;
@@ -30,6 +33,10 @@ public class Missao {
         return asteroides;
     }
 
+    public java.util.List<Inimigo> getInimigos() {
+        return inimigos;
+    }
+
     /**
      * Adiciona um passageiro ao mapa da missão.
      *
@@ -44,11 +51,30 @@ public class Missao {
      */
     public void addAsteroide(Asteroide a) { asteroides.add(a); }
 
+    public void addInimigo(Inimigo inimigo) {
+        inimigos.add(inimigo);
+    }
+
     public boolean verificaColisao() {
         // Percorre todos os asteroides e verifica se algum coincide com a
         // posição da nave. Uso de método em Asteroide encapsula a checagem.
         for (Asteroide a : asteroides) {
             if (a.colideCom(nave)) return true;
+        }
+        return false;
+    }
+
+    public void moverInimigos(Random r) {
+        for (Inimigo inimigo : inimigos) {
+            inimigo.mover(r);
+        }
+    }
+
+    public boolean verificaColisaoInimigo() {
+        for (Inimigo inimigo : inimigos) {
+            if (inimigo.colideCom(nave)) {
+                return true;
+            }
         }
         return false;
     }
